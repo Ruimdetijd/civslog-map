@@ -31,7 +31,6 @@ const view = new View({
 	center: Projection.fromLonLat([0, 50]),
 	zoom: 4
 })
-window.myView = view
 
 export interface MapProps {
 	handleEvent: (name: string, data: any) => void
