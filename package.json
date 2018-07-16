@@ -1,7 +1,8 @@
 {
-  "name": "civslog-map",
-  "version": "1.0.1",
+  "name": "halicarnassus-map",
+  "version": "1.0.0",
   "description": "",
+  "repository": "https://github.com/ruimdetijd/halicarnassus-map.git",
   "main": "build/bundle.js",
   "types": "build/src/index.d.ts",
   "scripts": {

@@ -6,7 +6,7 @@ module.exports = {
 	},
 	output: {
 		filename: "[name].js",
-		library: "CivslogMap",
+		library: "HalicarnassusMap",
 		libraryTarget: "umd",
 		path: __dirname + "/build",
 		globalObject: 'this',
