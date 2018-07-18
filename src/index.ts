@@ -39,6 +39,7 @@ export interface MapProps {
 }
 export default class Map {
 	events = []
+	private map: OlMap
 	visibleEvents = []
 
 	constructor(props: MapProps) {
@@ -62,7 +63,7 @@ export default class Map {
 
 		const overlays = [popupOverlay]
 
-		const map: ol.Map = new OlMap({
+		this.map = new OlMap({
 			target: props.target,
 			layers,
 			overlays,
@@ -72,8 +73,8 @@ export default class Map {
 		this.events = props.events
 		this.updateFeatures()
 
-		map.on('click', function(e: any) {
-			var features = map.getFeaturesAtPixel(e.pixel);
+		this.map.on('click', function(e: any) {
+			var features = this.map.getFeaturesAtPixel(e.pixel);
 			if (features) {
 				features.forEach(feat => {
 					console.log('[Feat props]', feat.getProperties())
@@ -133,5 +134,9 @@ export default class Map {
 			return !(eFrom > visibleTo || eTo < visibleFrom)
 		})
 		this.updateFeatures()
+	}
+
+	updateSize() {
+		this.map.updateSize()
 	}
 }

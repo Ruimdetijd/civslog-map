@@ -5,6 +5,7 @@ export interface MapProps {
 }
 export default class Map {
     events: any[];
+    private map;
     visibleEvents: any[];
     constructor(props: MapProps);
     private updateFeatures();
@@ -12,4 +13,5 @@ export default class Map {
         visibleFrom: any;
         visibleTo: any;
     }): void;
+    updateSize(): void;
 }
