@@ -73,18 +73,20 @@ export default class Map {
 		this.events = props.events
 		this.updateFeatures()
 
-		this.map.on('click', function(e: any) {
-			var features = this.map.getFeaturesAtPixel(e.pixel);
-			if (features) {
-				features.forEach(feat => {
-					console.log('[Feat props]', feat.getProperties())
-				})
-				if (features.length === 1) {
-					props.handleEvent('MAP_FEATURE_CLICK', features[0].getProperties())
-					popup.handleClick(features[0], e.coordinate, popupOverlay)
-				}
+		this.map.on('click', this.handleClick(props, popup, popupOverlay))
+	}
+
+	private handleClick = (props, popup, popupOverlay) => (e) => {
+		var features = this.map.getFeaturesAtPixel(e.pixel);
+		if (features) {
+			features.forEach(feat => {
+				console.log('[Feat props]', feat.getProperties())
+			})
+			if (features.length === 1) {
+				props.handleEvent('MAP_FEATURE_CLICK', features[0].getProperties())
+				popup.handleClick(features[0], e.coordinate, popupOverlay)
 			}
-		})
+		}
 	}
 
 	private updateFeatures() {

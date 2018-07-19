@@ -8,6 +8,7 @@ export default class Map {
     private map;
     visibleEvents: any[];
     constructor(props: MapProps);
+    private handleClick;
     private updateFeatures();
     setRange({visibleFrom, visibleTo}: {
         visibleFrom: any;
