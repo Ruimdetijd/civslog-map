@@ -40,26 +40,18 @@ export interface MapProps {
 export default class Map {
 	events = []
 	private map: OlMap
+	popup: Popup
 	visibleEvents = []
 
 	constructor(props: MapProps) {
-		const popup = new Popup({
-			handleEvent: (name, data) => {
-				props.handleEvent(name, data)
-
-				if (name === 'OPEN_IFRAMES') {
-					const center = JSON.parse(data.event.locations[0].f1).coordinates
-					const coor = new Point(Projection.transform(center, 'EPSG:4326', 'EPSG:3857'))
-					view.animate({ center: coor.getCoordinates() })
-				}
-			}
-		})
-		
 		const popupOverlay = new Overlay({
-			element: popup.el,
 			autoPan: true,
 			autoPanAnimation: { duration: 250, source: null }
 		})
+
+		this.popup = new Popup(popupOverlay)
+		
+		popupOverlay.setElement(this.popup.el)
 
 		const overlays = [popupOverlay]
 
@@ -73,23 +65,25 @@ export default class Map {
 		this.events = props.events
 		this.updateFeatures()
 
-		this.map.on('click', this.handleClick(props, popup, popupOverlay))
+		this.map.on('click', this.handleClick)
 	}
 
-	private handleClick = (props, popup, popupOverlay) => (e) => {
+	private handleClick = (e) => {
 		var features = this.map.getFeaturesAtPixel(e.pixel);
 		if (features) {
-			features.forEach(feat => {
-				console.log('[Feat props]', feat.getProperties())
+			features.forEach((feat, index) => {
+				console.log(`[Feat props][${index + 1}]`, feat.getProperties())
 			})
 			if (features.length === 1) {
-				props.handleEvent('MAP_FEATURE_CLICK', features[0].getProperties())
-				popup.handleClick(features[0], e.coordinate, popupOverlay)
+				// props.handleEvent('MAP_FEATURE_CLICK', features[0].getProperties())
+				this.popup.show(features[0])
 			}
 		}
 	}
 
 	private updateFeatures() {
+		this.popup.hide()
+
 		const features = this.visibleEvents
 			.reduce((prev, curr) => {
 				if (curr.locations == null) return prev
@@ -120,19 +114,21 @@ export default class Map {
 				})
 				return prev
 			}, [])
-
 		vectorSource.clear()
 		vectorSource.addFeatures(features);
 	}
 
+	onSelect(event: { id: string }) {
+		const feature = vectorSource.getFeatures().find(f => f.getProperties().event.id === event.id)
+		console.log(feature)
+		if (feature) this.popup.show(feature)
+	}
+
 	setRange({ visibleFrom, visibleTo }) {
 		this.visibleEvents = this.events.filter(e => {
-			const eFrom = e.date_min != null ? e.date_min : e.date
-			const eTo = e.end_date_max != null ?
-				e.end_date_max :
-				e.end_date != null ?
-					e.end_date :
-					eFrom
+			const eFrom = e.date_min || e.date
+			let eTo = e.end_date_max || e.end_date
+			if (eTo == null) eTo = eFrom
 			return !(eFrom > visibleTo || eTo < visibleFrom)
 		})
 		this.updateFeatures()

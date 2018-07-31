@@ -1,16 +1,15 @@
-import { Feature, Coordinate, Overlay, render } from "openlayers";
+import { Feature, Overlay, render } from "openlayers";
 export interface PopupProps {
     handleEvent: (name: string, data: any) => void;
 }
 export default class Popup {
-    private props;
+    private overlay;
     closeButton: HTMLElement;
     content: HTMLElement;
     el: HTMLElement;
     event: any;
-    overlay: Overlay;
-    constructor(props: PopupProps);
-    private handleContentClick;
-    handleClick(feature: Feature | render.Feature, coordinate: Coordinate, overlay: Overlay): void;
+    constructor(overlay: Overlay);
+    hide(): void;
+    show(feature: Feature | render.Feature): void;
     private contentTemplate(featureProps);
 }

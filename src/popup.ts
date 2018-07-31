@@ -1,5 +1,6 @@
 import { CLASS_PREFIX } from "./constants";
-import { Feature, Coordinate, Overlay, render } from "openlayers";
+import { Feature, Overlay, render } from "openlayers";
+import Projection from 'ol/proj'
 
 export interface PopupProps {
 	handleEvent: (name: string, data: any) => void
@@ -9,9 +10,9 @@ export default class Popup {
 	content: HTMLElement
 	el: HTMLElement
 	event: any
-	overlay: Overlay
+	// overlay: Overlay
 
-	constructor(private props: PopupProps) {
+	constructor(private overlay: Overlay) {
 		this.el = document.createElement('div')
 		this.el.classList.add(`${CLASS_PREFIX}popup`)
 
@@ -23,35 +24,20 @@ export default class Popup {
 		this.el.appendChild(this.closeButton)
 
 		this.content = document.createElement('div')
-		this.content.addEventListener('click', this.handleContentClick)
 		this.el.appendChild(this.content)
 	}
 
-	private handleContentClick = async (ev) => {
-		if (ev.target.matches('.reload')) {
-			const response = await fetch(`/api/sync-event/${this.event.wikidata_identifier}`)
-			const event = await response.json()
-			console.log(event)
-		} else if (ev.target.matches('.wikidata-internal img')) {
-			this.props.handleEvent('OPEN_IFRAME', `https://wikidata.org/wiki/${this.event.wikidata_identifier}`)
-		} else if (ev.target.matches('.wikipedia-internal img')) {
-			this.props.handleEvent('OPEN_IFRAME', `https://en.wikipedia.org/wiki/${this.event.label}`)
-		} else if (ev.target.matches('.wikidata-wikipedia-internal img')) {
-			this.props.handleEvent('OPEN_IFRAMES', {
-				event: this.event,
-				leftSrc: `https://wikidata.org/wiki/${this.event.wikidata_identifier}`,
-				rightSrc: `https://en.wikipedia.org/wiki/${this.event.label}`,
-			})
-		}
-		
+	hide() {
+		this.overlay.setPosition(undefined)
 	}
 
-	handleClick(feature: Feature | render.Feature, coordinate: Coordinate, overlay: Overlay) {
-		if (this.overlay == null) this.overlay = overlay
+	show(feature: Feature | render.Feature) {
+		if (this.overlay == null) return console.error('[Popup.show] No overlay')
 		const props = feature.getProperties()
 		this.event = props.event
 		this.content.innerHTML = this.contentTemplate(props)
-		overlay.setPosition(coordinate)
+		const coor = Projection.transform(props.coordinates.coordinates, 'EPSG:4326', 'EPSG:3857')
+		this.overlay.setPosition(coor)
 	}
 
 	private contentTemplate(featureProps): string {
@@ -63,26 +49,7 @@ export default class Popup {
 				<li>${featureProps.event.date}</li>
 				<li>${featureProps.event.end_date}</li>
 				<li>${featureProps.event.end_date_max}</li>
-			</ul>
-			<div class="links">
-				<div class="reload" title="Sync event with Wikidata">⟳</div>
-				<div class="wikidata-wikipedia-internal">
-					<img src="https://upload.wikimedia.org/wikipedia/commons/f/ff/Wikidata-logo.svg" />
-					<img src="https://upload.wikimedia.org/wikipedia/commons/d/d6/Wikipedia-logo-v2-en.png" />
-				</div>
-				<div class="wikidata-internal">
-					<img src="https://upload.wikimedia.org/wikipedia/commons/f/ff/Wikidata-logo.svg" />
-				</div>
-				<div class="wikipedia-internal">
-					<img src="https://upload.wikimedia.org/wikipedia/commons/d/d6/Wikipedia-logo-v2-en.png" />
-				</div>
-				<a href="https://wikidata.org/wiki/${featureProps.event.wikidata_identifier}" title="Wikidata">
-					<img src="https://upload.wikimedia.org/wikipedia/commons/f/ff/Wikidata-logo.svg" />
-				</a>
-				<a href="https://en.wikipedia.org/wiki/${featureProps.event.label}" title="Wikipedia">
-					<img src="https://upload.wikimedia.org/wikipedia/commons/d/d6/Wikipedia-logo-v2-en.png" />
-				</a>
-			</div>`.replace(/\>(\\n|\s+)\</g, '><')
+			</ul>`.replace(/\>(\\n|\s+)\</g, '><')
 	}
 }
 
