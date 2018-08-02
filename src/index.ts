@@ -1,15 +1,15 @@
-import Feature from 'ol/feature'
-import OlMap from 'ol/map'
-import Point from 'ol/geom/point'
-import Projection from 'ol/proj'
-import Stamen from 'ol/source/stamen'
-import TileLayer from 'ol/layer/tile'
-import VectorLayer from 'ol/layer/vector'
-import Overlay from 'ol/overlay'
-import VectorSource from 'ol/source/vector'
-import View from 'ol/view'
+import Feature from 'ol/Feature'
+import OlMap from 'ol/WebGLMap'
+import Point from 'ol/geom/Point'
+// @ts-ignore
+import { fromLonLat, transform } from 'ol/proj'
+import Stamen from 'ol/source/Stamen'
+import TileLayer from 'ol/layer/Tile'
+import VectorLayer from 'ol/layer/Vector'
+import Overlay from 'ol/Overlay'
+import VectorSource from 'ol/source/Vector'
+import View from 'ol/View'
 import Popup from './popup'
-
 import { battleIconStyle, birthIconStyle, deathIconStyle, aerialBattleIconStyle } from './icons'
 
 const vectorSource = new VectorSource({});
@@ -28,7 +28,7 @@ const layers = [
 ]
 
 const view = new View({
-	center: Projection.fromLonLat([0, 50]),
+	center: fromLonLat([0, 50]),
 	zoom: 4
 })
 
@@ -75,7 +75,6 @@ export default class Map {
 				console.log(`[Feat props][${index + 1}]`, feat.getProperties())
 			})
 			if (features.length === 1) {
-				// props.handleEvent('MAP_FEATURE_CLICK', features[0].getProperties())
 				this.popup.show(features[0])
 			}
 		}
@@ -90,7 +89,7 @@ export default class Map {
 				curr.locations.forEach(l => {
 					const coor = JSON.parse(l.f1)
 					const iconFeature = new Feature({
-						geometry: new Point(Projection.transform(coor.coordinates, 'EPSG:4326', 'EPSG:3857')),
+						geometry: new Point(transform(coor.coordinates, 'EPSG:4326', 'EPSG:3857')),
 						coordinates: coor,
 						date: l.f2,
 						end_date: l.f3,

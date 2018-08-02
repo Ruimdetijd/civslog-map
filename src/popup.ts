@@ -1,16 +1,15 @@
 import { CLASS_PREFIX } from "./constants";
-import { Feature, Overlay, render } from "openlayers";
-import Projection from 'ol/proj'
+import Feature from 'ol/Feature'
+import Overlay from 'ol/Overlay'
+import render from 'ol/render'
+// @ts-ignore
+import { transform } from 'ol/proj'
 
-export interface PopupProps {
-	handleEvent: (name: string, data: any) => void
-}
 export default class Popup {
 	closeButton: HTMLElement
 	content: HTMLElement
 	el: HTMLElement
 	event: any
-	// overlay: Overlay
 
 	constructor(private overlay: Overlay) {
 		this.el = document.createElement('div')
@@ -36,7 +35,7 @@ export default class Popup {
 		const props = feature.getProperties()
 		this.event = props.event
 		this.content.innerHTML = this.contentTemplate(props)
-		const coor = Projection.transform(props.coordinates.coordinates, 'EPSG:4326', 'EPSG:3857')
+		const coor = transform(props.coordinates.coordinates, 'EPSG:4326', 'EPSG:3857')
 		this.overlay.setPosition(coor)
 	}
 
@@ -52,8 +51,3 @@ export default class Popup {
 			</ul>`.replace(/\>(\\n|\s+)\</g, '><')
 	}
 }
-
-// <div id="popup" class="ol-popup">
-//       <a href="#" id="popup-closer" class="ol-popup-closer"></a>
-//       <div id="popup-content"></div>
-// 	</div>

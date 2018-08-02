@@ -1,5 +1,4 @@
-import Style from 'ol/style/style';
-export declare const battleIconStyle: Style;
-export declare const aerialBattleIconStyle: Style;
-export declare const birthIconStyle: Style;
-export declare const deathIconStyle: Style;
+export declare const battleIconStyle: any;
+export declare const aerialBattleIconStyle: any;
+export declare const birthIconStyle: any;
+export declare const deathIconStyle: any;

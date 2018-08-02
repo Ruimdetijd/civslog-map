@@ -1,7 +1,6 @@
-import { Feature, Overlay, render } from "openlayers";
-export interface PopupProps {
-    handleEvent: (name: string, data: any) => void;
-}
+import Feature from 'ol/Feature';
+import Overlay from 'ol/Overlay';
+import render from 'ol/render';
 export default class Popup {
     private overlay;
     closeButton: HTMLElement;
@@ -11,5 +10,5 @@ export default class Popup {
     constructor(overlay: Overlay);
     hide(): void;
     show(feature: Feature | render.Feature): void;
-    private contentTemplate(featureProps);
+    private contentTemplate;
 }

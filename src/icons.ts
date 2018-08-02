@@ -1,5 +1,5 @@
-import Style from 'ol/style/style'
-import Icon from 'ol/style/icon'
+import Style from 'ol/style/Style'
+import Icon from 'ol/style/Icon'
 import { battleSvg, aerialBattleSvg, birthSvg, deathSvg } from './svg'
 
 const iconArgs = (iconString: string): any => ({

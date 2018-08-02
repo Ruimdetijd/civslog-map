@@ -11,11 +11,11 @@ export default class Map {
     visibleEvents: any[];
     constructor(props: MapProps);
     private handleClick;
-    private updateFeatures();
+    private updateFeatures;
     onSelect(event: {
         id: string;
     }): void;
-    setRange({visibleFrom, visibleTo}: {
+    setRange({ visibleFrom, visibleTo }: {
         visibleFrom: any;
         visibleTo: any;
     }): void;
