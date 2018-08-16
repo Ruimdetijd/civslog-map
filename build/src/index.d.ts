@@ -2,7 +2,6 @@ import Popup from './popup';
 export interface MapProps {
     handleEvent: (name: string, data: any) => void;
     target: string;
-    events: any[];
 }
 export default class Map {
     events: any[];

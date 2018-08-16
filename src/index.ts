@@ -35,7 +35,6 @@ const view = new View({
 export interface MapProps {
 	handleEvent: (name: string, data: any) => void
 	target: string,
-	events: any[],
 }
 export default class Map {
 	events = []
@@ -62,7 +61,6 @@ export default class Map {
 			view,
 		})
 
-		this.events = props.events
 		this.updateFeatures()
 
 		this.map.on('click', this.handleClick)

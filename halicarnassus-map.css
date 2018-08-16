@@ -46,6 +46,10 @@
 	margin: 0;
 }
 
+.clm-popup .wikidata-id {
+	margin-top: 1em;
+}
+
 .clm-popup .links {
 	margin-top: 2em;
 	text-align: right;
