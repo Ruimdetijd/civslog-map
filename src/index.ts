@@ -123,13 +123,8 @@ export default class Map {
 		if (feature) this.popup.show(feature)
 	}
 
-	setRange({ visibleFrom, visibleTo }) {
-		this.visibleEvents = this.events.filter(e => {
-			const eFrom = e.date_min || e.date
-			let eTo = e.end_date_max || e.end_date
-			if (eTo == null) eTo = eFrom
-			return !(eFrom > visibleTo || eTo < visibleFrom)
-		})
+	setVisibleEvents(visibleEvents) {
+		this.visibleEvents = visibleEvents
 		this.updateFeatures()
 	}
 

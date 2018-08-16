@@ -15,9 +15,6 @@ export default class Map {
     onSelect(event: {
         id: string;
     }): void;
-    setRange({ visibleFrom, visibleTo }: {
-        visibleFrom: any;
-        visibleTo: any;
-    }): void;
+    setVisibleEvents(visibleEvents: any): void;
     updateSize(): void;
 }
