@@ -1,16 +1,35 @@
+// @ts-ignore
 import Feature from 'ol/Feature'
+// @ts-ignore
 import OlMap from 'ol/WebGLMap'
+// @ts-ignore
 import Point from 'ol/geom/Point'
 // @ts-ignore
 import { fromLonLat, transform } from 'ol/proj'
+// @ts-ignore
 import Stamen from 'ol/source/Stamen'
+// @ts-ignore
 import TileLayer from 'ol/layer/Tile'
+// @ts-ignore
 import VectorLayer from 'ol/layer/Vector'
+// @ts-ignore
 import Overlay from 'ol/Overlay'
+// @ts-ignore
 import VectorSource from 'ol/source/Vector'
+// @ts-ignore
 import View from 'ol/View'
 import Popup from './popup'
-import { battleIconStyle, birthIconStyle, deathIconStyle, aerialBattleIconStyle } from './icons'
+// import { battleIconStyle } from './icons'
+import { RawEv3nt, TimelineProps } from 'timeline'
+
+// @ts-ignore
+import Style from 'ol/style/Style'
+// @ts-ignore
+import CircleStyle from 'ol/style/Circle'
+// @ts-ignore
+import Fill from 'ol/style/Fill'
+// @ts-ignore
+import Stroke from 'ol/style/Stroke'
 
 const vectorSource = new VectorSource({});
 
@@ -37,10 +56,9 @@ export interface MapProps {
 	target: string,
 }
 export default class Map {
-	events = []
 	private map: OlMap
-	popup: Popup
-	visibleEvents = []
+	private popup: Popup
+	private features: { [ eventID: string ]: Feature } = {}
 
 	constructor(props: MapProps) {
 		const popupOverlay = new Overlay({
@@ -61,69 +79,73 @@ export default class Map {
 			view,
 		})
 
-		this.updateFeatures()
-
 		this.map.on('click', this.handleClick)
 	}
 
-	private handleClick = (e) => {
+	private handleClick = (e: any) => {
 		var features = this.map.getFeaturesAtPixel(e.pixel);
-		if (features) {
-			features.forEach((feat, index) => {
-				console.log(`[Feat props][${index + 1}]`, feat.getProperties())
-			})
-			if (features.length === 1) {
-				this.popup.show(features[0])
-			}
-		}
+		if (features != null) this.popup.show(features)
 	}
 
-	private updateFeatures() {
+	private createImageStyle(color: string) {
+		return new CircleStyle({
+			radius: 6,
+			stroke: new Stroke({
+				color: 'black',
+			}),
+			fill: new Fill({ color })
+		})
+	}
+
+	private createFeature(event: RawEv3nt, location: any, id: string): any {
+		const coor = JSON.parse(location.f1)
+		const marker = new Feature({
+			geometry: new Point(transform(coor.coordinates, 'EPSG:4326', 'EPSG:3857')),
+			coordinates: coor,
+			date: location.f2,
+			end_date: location.f3,
+			event,
+		});
+		marker.setId(id)
+
+		marker.setStyle(new Style({
+			image: this.createImageStyle(event.color)
+		}))
+
+		return marker
+	}
+
+	private updateFeatures(visibleEvents: RawEv3nt[]): void {
 		this.popup.hide()
 
-		const features = this.visibleEvents
-			.reduce((prev, curr) => {
-				if (curr.locations == null) return prev
-				curr.locations.forEach(l => {
-					const coor = JSON.parse(l.f1)
-					const iconFeature = new Feature({
-						geometry: new Point(transform(coor.coordinates, 'EPSG:4326', 'EPSG:3857')),
-						coordinates: coor,
-						date: l.f2,
-						end_date: l.f3,
-						event: curr,
-					});
-					let icon
-					if (curr.tags.indexOf('battle') > -1) {
-						icon = battleIconStyle
-						if (curr.tags.indexOf('aerial battle') > -1) icon = aerialBattleIconStyle
-					}
-					else if (
-						curr.tags.indexOf('human') > -1 &&
-						(
-							curr.date === l.f2 ||
-							curr.date_min === l.f2
-						)
-					) icon = birthIconStyle
-					else if (curr.tags.indexOf('human') > -1 && curr.end_date === l.f2) icon = deathIconStyle
-					iconFeature.setStyle(icon)
-					prev.push(iconFeature)
-				})
-				return prev
+		const features = visibleEvents
+			.reduce((prev, event) => {
+				if (event.locations == null) return prev
+				const ftrs = event.locations
+					.map((location, index) => {
+						const key = `${event.id}-${index}`
+						if (!this.features.hasOwnProperty(key)) {
+							this.features[key] = this.createFeature(event, location, key)
+						} else {
+							// Update the color (fill) of the feature
+							this.features[key].getStyle().setImage(this.createImageStyle(event.color))
+						}
+						return this.features[key]
+					})
+				return prev.concat(...ftrs)
 			}, [])
+
 		vectorSource.clear()
 		vectorSource.addFeatures(features);
 	}
 
-	onSelect(event: { id: string }) {
-		const feature = vectorSource.getFeatures().find(f => f.getProperties().event.id === event.id)
-		console.log(feature)
-		if (feature) this.popup.show(feature)
+	onSelect(event: RawEv3nt) {
+		const feature = vectorSource.getFeatures().find((f: any) => f.getProperties().event.id === event.id)
+		if (feature) this.popup.show([feature])
 	}
 
-	setVisibleEvents(visibleEvents) {
-		this.visibleEvents = visibleEvents
-		this.updateFeatures()
+	setVisibleEvents(visibleEvents: RawEv3nt[], _props: TimelineProps) {
+		this.updateFeatures(visibleEvents)
 	}
 
 	updateSize() {
