@@ -4,11 +4,12 @@ module.exports = {
 	entry: {
 		bundle: "./src/index.ts",
 	},
+	mode: "development",
 	output: {
 		filename: "[name].js",
 		library: "HalicarnassusMap",
 		libraryTarget: "umd",
-		path: __dirname + "/build",
+		path: __dirname + "/dist",
 		globalObject: 'this',
 	},
 	resolve: {
