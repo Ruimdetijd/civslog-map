@@ -1,15 +1,17 @@
-import Feature from 'ol/Feature';
-import Overlay from 'ol/Overlay';
 export default class Popup {
     private overlay;
     closeButton: HTMLElement;
     content: HTMLElement;
-    currentFeature: Feature;
+    currentFeatures: any[];
     el: HTMLElement;
     syncing: boolean;
-    constructor(overlay: Overlay);
+    constructor(overlay: any);
     hide(): void;
-    show(feature: Feature): void;
+    show(features: any[]): void;
     private handleClick;
-    private contentTemplate;
+    private featureListItem;
+    private multipleFeaturesTemplate;
+    private formatFrom;
+    private formatTo;
+    private singleFeatureTemplate;
 }
